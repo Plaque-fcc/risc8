@@ -144,11 +144,13 @@ module risc8_core(
 	reg alu_store;
 	reg alu_word;
 	reg alu_carry;
+	reg alu_keep_sreg;
 
 	// delayed by one cycle for the register file to finish loading
 	reg prev_alu_store;
 	reg prev_alu_word;
 	reg prev_alu_carry;
+	reg prev_alu_keep_sreg;
 	reg [5:0] prev_sel_Rd;
 
 	// opcode registers
@@ -202,6 +204,7 @@ module risc8_core(
 		.reset(reset),
 		.op(prev_alu_op),
 		.use_carry(prev_alu_carry),
+		.keep_sreg(prev_alu_keep_sreg),
 		.Rd_in(alu_Rd),
 		.Rr_in(alu_Rr),
 		.R_out(alu_out),
@@ -265,6 +268,7 @@ module risc8_core(
 		prev_alu_op <= alu_op;
 		prev_alu_store <= alu_store;
 		prev_alu_carry <= alu_carry;
+		prev_alu_keep_sreg <= alu_keep_sreg;
 		prev_alu_const <= alu_const;
 		prev_alu_const_value <= alu_const_value;
 		prev_alu_word <= alu_word;
@@ -330,6 +334,7 @@ module risc8_core(
 		alu_const = 0;
 		alu_const_value = 0;
 		alu_carry = 0;
+		alu_keep_sreg = 0;
 
 		// default is to select the Rd and Rr from the opcode,
 		// storing into Rd.  Most instructions modify these
@@ -538,6 +543,7 @@ module risc8_core(
 				alu_word = 1;
 				alu_const = 1;
 				alu_const_value = 1;
+				alu_keep_sreg = 1;
 
 				case(opcode[1:0])
 				2'b01: begin
@@ -585,6 +591,7 @@ module risc8_core(
 				alu_op = `OP_ADW;
 				alu_const = 1;
 				alu_const_value = op_Q;
+				alu_keep_sreg = 1;
 				
 				next_cycle = 1;
 			end
@@ -612,6 +619,7 @@ module risc8_core(
 				alu_word = 1;
 				alu_const = 1;
 				alu_const_value = opcode[0];
+				alu_keep_sreg = 1;
 
 				// start a read of the program memory space
 				// storing the real next PC into the temp reg
